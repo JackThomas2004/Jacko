@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique @db.VarChar(30)
+  email        String   @unique @db.VarChar(255)
+  passwordHash String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+
+  // Relations
+  sentRequests     Friendship[] @relation("Requester")
+  receivedRequests Friendship[] @relation("Addressee")
+  hostedLobbies    Lobby[]      @relation("Host")
+  lobbyMembers     LobbyMember[]
+  wonGames         Game[]       @relation("Winner")
+  gameScores       GameScore[]
+
+  @@map("users")
+}
+
+enum FriendshipStatus {
+  pending
+  accepted
+  declined
+  blocked
+}
+
+model Friendship {
+  id          String           @id @default(uuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(pending)
+  createdAt   DateTime         @default(now())
+
+  requester User @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@map("friendships")
+}
+
+enum LobbyStatus {
+  waiting
+  in_progress
+  finished
+}
+
+model Lobby {
+  id         String      @id @default(uuid())
+  code       String      @unique @db.VarChar(6)
+  hostId     String
+  status     LobbyStatus @default(waiting)
+  maxPlayers Int         @default(4)
+  createdAt  DateTime    @default(now())
+
+  host    User          @relation("Host", fields: [hostId], references: [id], onDelete: Cascade)
+  members LobbyMember[]
+  games   Game[]
+
+  @@map("lobbies")
+}
+
+model LobbyMember {
+  lobbyId  String
+  userId   String
+  isReady  Boolean  @default(false)
+  joinedAt DateTime @default(now())
+
+  lobby Lobby @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([lobbyId, userId])
+  @@map("lobby_members")
+}
+
+model Game {
+  id        String    @id @default(uuid())
+  lobbyId   String
+  winnerId  String?
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  lobby  Lobby       @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  winner User?       @relation("Winner", fields: [winnerId], references: [id])
+  scores GameScore[]
+
+  @@map("games")
+}
+
+model GameScore {
+  id          String @id @default(uuid())
+  gameId      String
+  userId      String
+  roundNumber Int
+  roundScore  Int
+  totalScore  Int
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("game_scores")
+}
