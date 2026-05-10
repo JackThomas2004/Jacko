@@ -87,7 +87,8 @@ function BookingForm({ space, onBooked }) {
     try {
       const res = await createBooking({ spaceId: space.id, startTime, endTime, notes });
       const { booking, clientSecret } = res.data;
-      if (clientSecret) {
+      if (clientSecret && booking?.id) {
+        sessionStorage.setItem(`cs_${booking.id}`, clientSecret);
         navigate(`/checkout/${booking.id}`);
       } else {
         navigate('/my-bookings');

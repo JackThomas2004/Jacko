@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { forgotPassword } from '../api/client';
 
 const INPUT_CLASS = 'w-full border border-[#DDDDDD] rounded-lg px-4 py-3 text-sm text-[#222222] placeholder-[#717171] focus:border-[#222222] focus:outline-none focus:ring-0 transition-colors';
@@ -21,9 +22,9 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      <div className="max-w-md mx-auto px-4 py-24">
+      <div className="flex-1 max-w-md mx-auto w-full px-4 py-24">
         {submitted ? (
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -68,6 +69,7 @@ export default function ForgotPassword() {
           </>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

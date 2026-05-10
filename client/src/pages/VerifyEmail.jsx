@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { verifyEmail } from '../api/client';
 
 export default function VerifyEmail() {
@@ -16,9 +17,9 @@ export default function VerifyEmail() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      <div className="max-w-md mx-auto px-4 py-24 text-center">
+      <div className="flex-1 max-w-md mx-auto w-full px-4 py-24 text-center">
         {status === 'loading' && (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-brand border-t-transparent" />
@@ -55,6 +56,7 @@ export default function VerifyEmail() {
           </>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

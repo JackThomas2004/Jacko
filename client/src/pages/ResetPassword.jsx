@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { resetPassword } from '../api/client';
 
 const INPUT_CLASS = 'w-full border border-[#DDDDDD] rounded-lg px-4 py-3 text-sm text-[#222222] placeholder-[#717171] focus:border-[#222222] focus:outline-none focus:ring-0 transition-colors';
@@ -37,21 +38,22 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex flex-col">
         <Navbar />
-        <div className="max-w-md mx-auto px-4 py-24 text-center">
+        <div className="flex-1 max-w-md mx-auto w-full px-4 py-24 text-center">
           <h1 className="text-2xl font-bold text-[#222222] mb-3">Invalid link</h1>
           <p className="text-[#717171] mb-6">This password reset link is missing or invalid.</p>
           <Link to="/forgot-password" className="text-brand hover:underline text-sm font-medium">Request a new link</Link>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      <div className="max-w-md mx-auto px-4 py-24">
+      <div className="flex-1 max-w-md mx-auto w-full px-4 py-24">
         <h1 className="text-2xl font-bold text-[#222222] mb-2">Set a new password</h1>
         <p className="text-[#717171] mb-8 text-sm">Choose a strong password for your account.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -87,6 +89,7 @@ export default function ResetPassword() {
           </button>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }
