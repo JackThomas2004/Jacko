@@ -1,42 +1,53 @@
 import axios from 'axios';
 
-// In production (Vercel), VITE_API_URL points to the Railway backend.
-// In local dev, it's empty and the Vite proxy handles /api → localhost:4000.
 const BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
   : '/api/v1';
 
-const api = axios.create({
-  baseURL: BASE,
-  withCredentials: true,
-});
+const api = axios.create({ baseURL: BASE, withCredentials: true });
 
 // Auth
 export const register = (data) => api.post('/auth/register', data);
 export const login = (data) => api.post('/auth/login', data);
 export const logout = () => api.post('/auth/logout');
 export const getMe = () => api.get('/auth/me');
-export const updateMe = (data) => api.patch('/users/me', data);
+export const updateMe = (data) => api.patch('/auth/me', data);
+export const verifyEmail = (token) => api.post('/auth/verify-email', { token });
+export const forgotPassword = (email) => api.post('/auth/forgot-password', { email });
+export const resetPassword = (token, password) => api.post('/auth/reset-password', { token, password });
 
-// Users
-export const searchUsers = (q) => api.get('/users/search', { params: { q } });
-export const getUser = (id) => api.get(`/users/${id}`);
+// Spaces
+export const getSpaces = (params) => api.get('/spaces', { params });
+export const getSpace = (id) => api.get(`/spaces/${id}`);
+export const getMySpaces = () => api.get('/spaces/owner/mine');
+export const createSpace = (data) => api.post('/spaces', data);
+export const updateSpace = (id, data) => api.patch(`/spaces/${id}`, data);
+export const deleteSpace = (id) => api.delete(`/spaces/${id}`);
 
-// Friends
-export const getFriends = () => api.get('/friends');
-export const getIncomingRequests = () => api.get('/friends/requests/incoming');
-export const sendFriendRequest = (userId) => api.post(`/friends/request/${userId}`);
-export const acceptFriendRequest = (id) => api.post(`/friends/accept/${id}`);
-export const declineFriendRequest = (id) => api.post(`/friends/decline/${id}`);
-export const removeFriend = (userId) => api.delete(`/friends/${userId}`);
+// Bookings
+export const createBooking = (data) => api.post('/bookings', data);
+export const getMyBookings = () => api.get('/bookings/mine');
+export const getHostedBookings = () => api.get('/bookings/hosted');
+export const updateBookingStatus = (id, status) => api.patch(`/bookings/${id}/status`, { status });
 
-// Lobbies
-export const createLobby = (data) => api.post('/lobbies', data);
-export const getLobby = (code) => api.get(`/lobbies/${code}`);
-export const closeLobby = (id) => api.delete(`/lobbies/${id}`);
+// Payments
+export const getStripeConfig = () => api.get('/payments/config');
 
-// Games
-export const getGame = (id) => api.get(`/games/${id}`);
-export const getGameHistory = () => api.get('/games/history');
+// Upload
+export const uploadImage = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return api.post('/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+// Reviews
+export const createReview = (data) => api.post('/reviews', data);
+export const getSpaceReviews = (spaceId) => api.get(`/reviews/space/${spaceId}`);
+
+// Availability
+export const getAvailability = (spaceId) => api.get(`/availability/${spaceId}`);
+export const setAvailability = (spaceId, schedule) => api.put(`/availability/${spaceId}`, { schedule });
 
 export default api;
