@@ -8,59 +8,86 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  phone        String?
-  bio          String?
-  createdAt    DateTime @default(now())
+  id                String    @id @default(uuid())
+  name              String
+  email             String    @unique
+  passwordHash      String
+  phone             String?
+  bio               String?
+  avatar            String?
+  emailVerified     Boolean   @default(false)
+  verificationToken String?
+  resetToken        String?
+  resetTokenExpiry  String?   // ISO string stored as text in SQLite
+  stripeCustomerId  String?
+  createdAt         DateTime  @default(now())
 
-  spaces    Space[]
-  bookings  Booking[] @relation("RenterBookings")
-  reviews   Review[]  @relation("ReviewerReviews")
+  spaces   Space[]
+  bookings Booking[] @relation("RenterBookings")
+  reviews  Review[]  @relation("ReviewerReviews")
 
   @@map("users")
 }
 
 model Space {
-  id           String    @id @default(uuid())
-  ownerId      String
-  title        String
-  description  String?
-  address      String
-  city         String
-  state        String
-  zipCode      String
-  type         String    // garage | driveway | parking_lot | carport
-  pricePerHour Float?
-  pricePerDay  Float?
-  amenities    String    @default("[]") // JSON array
-  images       String    @default("[]") // JSON array
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
+  id             String   @id @default(uuid())
+  ownerId        String
+  title          String
+  description    String?
+  address        String
+  city           String
+  state          String
+  zipCode        String
+  latitude       Float?
+  longitude      Float?
+  type           String
+  pricePerHour   Float?
+  pricePerDay    Float?
+  amenities      String   @default("[]")
+  images         String   @default("[]")
+  isActive       Boolean  @default(true)
+  instantBook    Boolean  @default(false)
+  maxVehicleSize String?
+  createdAt      DateTime @default(now())
 
-  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  bookings Booking[]
-  reviews  Review[]
+  owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+  reviews      Review[]
+  availability Availability[]
 
   @@map("spaces")
 }
 
-model Booking {
-  id         String   @id @default(uuid())
-  spaceId    String
-  renterId   String
-  startTime  DateTime
-  endTime    DateTime
-  totalPrice Float
-  status     String   @default("pending") // pending | confirmed | cancelled | completed
-  notes      String?
-  createdAt  DateTime @default(now())
+model Availability {
+  id        String @id @default(uuid())
+  spaceId   String
+  dayOfWeek Int
+  startTime String
+  endTime   String
 
-  space   Space   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  renter  User    @relation("RenterBookings", fields: [renterId], references: [id], onDelete: Cascade)
-  review  Review?
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, dayOfWeek])
+  @@map("availability")
+}
+
+model Booking {
+  id                    String   @id @default(uuid())
+  spaceId               String
+  renterId              String
+  startTime             DateTime
+  endTime               DateTime
+  totalPrice            Float
+  serviceFee            Float    @default(0)
+  status                String   @default("pending_payment")
+  paymentStatus         String   @default("unpaid")
+  stripePaymentIntentId String?
+  notes                 String?
+  createdAt             DateTime @default(now())
+
+  space  Space   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  renter User    @relation("RenterBookings", fields: [renterId], references: [id], onDelete: Cascade)
+  review Review?
 
   @@map("bookings")
 }

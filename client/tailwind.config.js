@@ -4,18 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        card: {
-          'dark-blue': '#1a3a5c',
-          blue: '#2563eb',
-          white: '#f8fafc',
-          yellow: '#eab308',
-          orange: '#f97316',
-          red: '#ef4444',
-          back: '#166534',
-        },
+        brand: '#FF385C',
+        'brand-dark': '#E31C5F',
       },
       fontFamily: {
-        game: ['"Segoe UI"', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

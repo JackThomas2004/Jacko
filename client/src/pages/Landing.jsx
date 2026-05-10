@@ -3,20 +3,34 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from '../components/AuthModal';
 import Navbar from '../components/Navbar';
-
-const FEATURES = [
-  { icon: '🏠', title: 'List Your Space', desc: 'Turn your unused garage, driveway, or parking spot into passive income. Set your own hours and price.' },
-  { icon: '🔍', title: 'Find Parking', desc: 'Browse nearby spaces, filter by type and price, and book in seconds — no app download required.' },
-  { icon: '💳', title: 'Easy Payments', desc: 'Secure checkout with instant confirmation. Hosts get paid after each completed booking.' },
-  { icon: '⭐', title: 'Trusted Reviews', desc: 'Both hosts and renters can leave reviews so everyone stays accountable and the community stays safe.' },
-];
+import Footer from '../components/Footer';
 
 const HOW_IT_WORKS = [
-  { step: '1', title: 'Create an account', desc: 'Sign up for free in under a minute.' },
-  { step: '2', title: 'List or search', desc: 'Post your space in minutes, or search by city for available spots.' },
-  { step: '3', title: 'Book & pay', desc: 'Pick your dates, confirm, and pay securely online.' },
-  { step: '4', title: 'Park & earn', desc: 'Renters get directions, hosts get paid. Simple.' },
+  {
+    step: '1',
+    title: 'Find a space',
+    desc: 'Search by city to discover garages, driveways, and parking lots near you.',
+  },
+  {
+    step: '2',
+    title: 'Book instantly',
+    desc: 'Pick your dates and times. Secure checkout in seconds — no waiting for approval.',
+  },
+  {
+    step: '3',
+    title: 'Park with confidence',
+    desc: 'Get directions, park stress-free, and leave a review when you are done.',
+  },
 ];
+
+function SearchIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <circle cx="11" cy="11" r="8" />
+      <path strokeLinecap="round" d="M21 21l-4.35-4.35" />
+    </svg>
+  );
+}
 
 export default function Landing() {
   const { user } = useAuth();
@@ -40,48 +54,77 @@ export default function Landing() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-24 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-extrabold mb-4 leading-tight">
-            Rent Out Your Parking Space.<br />Find Parking Near You.
+      <section className="relative bg-[#222222] text-white overflow-hidden">
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] via-[#2d2d2d] to-[#111111] opacity-90"
+          aria-hidden="true"
+        />
+        {/* Decorative pattern */}
+        <div className="absolute inset-0 opacity-5" aria-hidden="true"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 25% 25%, #FF385C 0%, transparent 50%), radial-gradient(circle at 75% 75%, #FF385C 0%, transparent 50%)',
+          }}
+        />
+
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-28 text-center">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 tracking-tight">
+            Find parking that<br />
+            <span className="text-brand">works for you.</span>
           </h1>
-          <p className="text-blue-100 text-xl mb-10 max-w-2xl mx-auto">
-            ParkSpot connects homeowners with spare parking to drivers who need a spot — by the hour or by the day.
+          <p className="text-lg sm:text-xl text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Book driveways, garages, and parking lots from real people in your city — by the hour or by the day.
           </p>
 
-          <form onSubmit={handleSearch} className="flex gap-2 max-w-xl mx-auto mb-6">
+          {/* Search bar */}
+          <form
+            onSubmit={handleSearch}
+            className="flex max-w-xl mx-auto bg-white rounded-full shadow-lg overflow-hidden mb-8"
+          >
             <input
               type="text"
               value={searchCity}
               onChange={(e) => setSearchCity(e.target.value)}
-              placeholder="Search by city (e.g. Austin)…"
-              className="flex-1 px-4 py-3 rounded-xl text-slate-800 text-base focus:outline-none focus:ring-2 focus:ring-white"
+              placeholder="Search by city — e.g. Austin, TX"
+              className="flex-1 px-6 py-4 text-[#222222] text-sm placeholder-[#717171] focus:outline-none bg-transparent"
             />
             <button
               type="submit"
-              className="bg-white text-blue-700 font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors"
+              className="bg-brand hover:bg-brand-dark text-white px-6 py-4 font-semibold flex items-center gap-2 flex-shrink-0 transition-colors text-sm"
             >
+              <SearchIcon />
               Search
             </button>
           </form>
 
-          <div className="flex gap-3 justify-center flex-wrap">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             {user ? (
               <>
-                <Link to="/browse" className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
-                  Find Parking
+                <Link
+                  to="/browse"
+                  className="bg-brand hover:bg-brand-dark text-white font-semibold px-8 py-3 rounded-full transition-colors text-sm"
+                >
+                  Browse Spaces
                 </Link>
-                <Link to="/list-space" className="border-2 border-white text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                <Link
+                  to="/list-space"
+                  className="border border-white/40 text-white hover:bg-white/10 font-semibold px-8 py-3 rounded-full transition-colors text-sm"
+                >
                   List My Space
                 </Link>
               </>
             ) : (
               <>
-                <button onClick={() => openAuth('register')} className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors">
-                  Get Started — It's Free
+                <button
+                  onClick={() => openAuth('register')}
+                  className="bg-brand hover:bg-brand-dark text-white font-semibold px-8 py-3 rounded-full transition-colors text-sm"
+                >
+                  Get started — it is free
                 </button>
-                <button onClick={() => openAuth('login')} className="border-2 border-white text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors">
-                  Sign In
+                <button
+                  onClick={() => openAuth('login')}
+                  className="border border-white/40 text-white hover:bg-white/10 font-semibold px-8 py-3 rounded-full transition-colors text-sm"
+                >
+                  Sign in
                 </button>
               </>
             )}
@@ -89,68 +132,74 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 px-4 bg-slate-50">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">Why ParkSpot?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
-                <div className="text-4xl mb-4">{f.icon}</div>
-                <h3 className="font-bold text-slate-800 mb-2">{f.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* How it works */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">How It Works</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {HOW_IT_WORKS.map((h) => (
-              <div key={h.step} className="text-center">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                  {h.step}
+      <section className="py-20 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold text-[#222222] text-center mb-4">
+            How it works
+          </h2>
+          <p className="text-[#717171] text-center mb-12 max-w-xl mx-auto">
+            Park smarter in three simple steps.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
+            {HOW_IT_WORKS.map((item) => (
+              <div key={item.step} className="text-center">
+                <div className="w-12 h-12 bg-brand text-white rounded-full flex items-center justify-center text-lg font-bold mx-auto mb-5">
+                  {item.step}
                 </div>
-                <h3 className="font-bold text-slate-800 mb-1">{h.title}</h3>
-                <p className="text-slate-500 text-sm">{h.desc}</p>
+                <h3 className="font-semibold text-[#222222] text-lg mb-2">{item.title}</h3>
+                <p className="text-[#717171] text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-blue-600 text-white py-16 px-4 text-center">
-        <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
-        <p className="text-blue-100 mb-8 text-lg">Join thousands of hosts and renters already using ParkSpot.</p>
-        {user ? (
-          <div className="flex gap-4 justify-center">
-            <Link to="/browse" className="bg-white text-blue-700 font-bold px-8 py-3 rounded-xl hover:bg-blue-50 transition-colors">
-              Find Parking
-            </Link>
-            <Link to="/list-space" className="border-2 border-white text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors">
-              List a Space
-            </Link>
+      {/* Divider */}
+      <div className="border-t border-[#DDDDDD] max-w-5xl mx-auto" />
+
+      {/* Become a host CTA */}
+      <section className="py-20 px-4 sm:px-6 bg-[#222222] text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Have a parking space sitting empty?
+          </h2>
+          <p className="text-white/70 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+            List your driveway, garage, or lot on ParkSpot and start earning. Set your own schedule and pricing. It takes less than 5 minutes.
+          </p>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            {user ? (
+              <Link
+                to="/list-space"
+                className="bg-white text-[#222222] hover:bg-[#F7F7F7] font-bold px-10 py-4 rounded-full transition-colors text-sm"
+              >
+                List my space
+              </Link>
+            ) : (
+              <>
+                <button
+                  onClick={() => openAuth('register')}
+                  className="bg-white text-[#222222] hover:bg-[#F7F7F7] font-bold px-10 py-4 rounded-full transition-colors text-sm"
+                >
+                  Become a host
+                </button>
+                <button
+                  onClick={() => openAuth('login')}
+                  className="border border-white/30 text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-full transition-colors text-sm"
+                >
+                  Sign in
+                </button>
+              </>
+            )}
           </div>
-        ) : (
-          <button
-            onClick={() => openAuth('register')}
-            className="bg-white text-blue-700 font-bold px-8 py-3 rounded-xl hover:bg-blue-50 transition-colors"
-          >
-            Create Free Account
-          </button>
-        )}
+        </div>
       </section>
 
-      <footer className="py-8 text-center text-slate-400 text-sm border-t border-slate-100">
-        © {new Date().getFullYear()} ParkSpot. All rights reserved.
-      </footer>
+      <Footer />
 
-      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} defaultTab={authTab} />}
+      {authOpen && (
+        <AuthModal onClose={() => setAuthOpen(false)} defaultTab={authTab} />
+      )}
     </div>
   );
 }
