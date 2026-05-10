@@ -1,25 +1,25 @@
-# Jacko
+# ParkSpot
 
-Online multiplayer card game based on Skyjo. Same rules, same card colours — new name.
+Peer-to-peer parking rental platform. Homeowners list their garages, driveways, and parking spaces; drivers find and book them by the hour or day.
+
+## Features
+
+- **For Hosts**: List a space (garage, driveway, carport, parking lot), set hourly and/or daily pricing, manage bookings (confirm / decline / complete), edit or deactivate listings.
+- **For Renters**: Browse spaces by city, type, and price, book instantly, view booking history, leave reviews after completed stays.
+- **Auth**: JWT-based (httpOnly cookie), register/login/logout, user profiles.
+- **Database**: SQLite via Prisma — zero external services needed for local dev.
 
 ## Prerequisites
 
 - Node.js 18+
-- PostgreSQL (running locally or a connection URL)
-- Redis (running locally or a connection URL)
 
 ## Quick Start
 
-### 1. Clone & install
+### 1. Install dependencies
 
 ```bash
-# Install server deps
-cd server
-npm install
-
-# Install client deps
-cd ../client
-npm install
+cd server && npm install
+cd ../client && npm install
 ```
 
 ### 2. Configure the server
@@ -27,105 +27,80 @@ npm install
 ```bash
 cd server
 cp .env.example .env
-# Edit .env — fill in DATABASE_URL, REDIS_URL, JWT_SECRET
+# The default DATABASE_URL="file:./dev.db" works out of the box.
+# Change JWT_SECRET for production.
 ```
 
 ### 3. Set up the database
 
 ```bash
 cd server
-npm run db:generate   # generate Prisma client
-npm run db:push       # push schema to your PostgreSQL DB
+npm run db:push       # creates dev.db and all tables
+npm run db:seed       # optional: seeds 2 demo users + 5 spaces
 ```
 
 ### 4. Run
 
-In two separate terminals:
+Two separate terminals:
 
 ```bash
-# Terminal 1 — backend
-cd server
-npm run dev
+# Terminal 1 — backend (http://localhost:4000)
+cd server && npm run dev
 
-# Terminal 2 — frontend
-cd client
-npm run dev
+# Terminal 2 — frontend (http://localhost:5173)
+cd client && npm run dev
 ```
 
 Open http://localhost:5173
+
+Demo accounts (if seeded):
+- `alice@example.com` / `password123`
+- `bob@example.com` / `password123`
 
 ---
 
 ## Project Structure
 
 ```
-jacko/
+parkspot/
 ├── server/
-│   ├── prisma/
-│   │   └── schema.prisma        # DB schema (users, friends, lobbies, games)
+│   ├── prisma/schema.prisma      # Users, Spaces, Bookings, Reviews
 │   └── src/
-│       ├── index.js             # Entry point
-│       ├── app.js               # Express app + routes
-│       ├── socket.js            # Socket.io server + JWT auth
-│       ├── middleware/
-│       │   └── auth.js          # JWT middleware
+│       ├── index.js              # Entry point
+│       ├── app.js                # Express app + routes
+│       ├── seed.js               # Demo data seeder
+│       ├── middleware/auth.js    # JWT middleware
 │       ├── routes/
-│       │   ├── auth.js          # POST /register, /login, /logout, GET /me
-│       │   ├── users.js         # GET/PATCH users
-│       │   ├── friends.js       # Friends list + requests
-│       │   ├── lobbies.js       # Create / join lobbies
-│       │   └── games.js         # Game history
-│       ├── game/
-│       │   ├── deck.js          # 150-card Jacko deck, shuffle, deal
-│       │   ├── gameEngine.js    # Pure game logic (all rules)
-│       │   └── socketHandlers.js # Real-time event handlers
-│       └── lib/
-│           ├── prisma.js        # Prisma client singleton
-│           └── redis.js         # Redis client + game state helpers
+│       │   ├── auth.js           # register, login, logout, me
+│       │   ├── spaces.js         # CRUD + search for spaces
+│       │   ├── bookings.js       # Create/manage bookings
+│       │   └── reviews.js        # Post-stay reviews
+│       └── lib/prisma.js         # Prisma client singleton
 │
 └── client/
     └── src/
-        ├── api/client.js        # Axios API wrapper (all endpoints)
-        ├── context/
-        │   ├── AuthContext.jsx  # Current user + login/register/logout
-        │   └── SocketContext.jsx # Socket.io connection
+        ├── api/client.js         # Axios wrapper for all API calls
+        ├── context/AuthContext.jsx
         ├── components/
-        │   ├── Card.jsx         # Single card (face-up/down, all colours)
-        │   ├── PlayerGrid.jsx   # 3×4 card grid
-        │   ├── Chat.jsx         # Floating chat panel
-        │   ├── Scoreboard.jsx   # Live score sidebar
-        │   └── Navbar.jsx       # Top nav bar
+        │   ├── Navbar.jsx
+        │   ├── SpaceCard.jsx
+        │   └── AuthModal.jsx
         └── pages/
-            ├── Landing.jsx      # Login / register
-            ├── Home.jsx         # Dashboard — create/join lobby + friends
-            ├── Friends.jsx      # Friends management
-            ├── Lobby.jsx        # Waiting room
-            ├── Game.jsx         # Main game table
-            ├── RoundSummary.jsx # End-of-round scores
-            └── GameOver.jsx     # Final podium screen
+            ├── Landing.jsx       # Hero + auth modal
+            ├── Browse.jsx        # Search with filters
+            ├── SpaceDetail.jsx   # Space info + booking form
+            ├── Dashboard.jsx     # User home
+            ├── ListSpace.jsx     # Create a new listing
+            ├── EditSpace.jsx     # Edit / delete listing
+            ├── MyBookings.jsx    # Renter: bookings + reviews
+            └── HostedBookings.jsx # Host: listings + incoming bookings
 ```
-
-## Game Rules (Jacko)
-
-See [jacko-game-plan.md](../jacko-game-plan.md) for the full spec.
-
-Key points:
-- 150 cards, values −2 to 12, colour-coded as in Skyjo
-- 2–8 players, each with a 3×4 grid (12 cards)
-- Flip 2 cards to start; take turns drawing or taking from discard
-- Complete a column of 3 identical values → column is removed
-- First player to flip all cards ends the round (others get 1 more turn)
-- Penalty: if the trigger player isn't lowest, their score is doubled
-- Game ends when any player hits 100+ cumulative points
-- Lowest total wins
 
 ## Tech Stack
 
-| Layer      | Tech                            |
-|------------|---------------------------------|
-| Frontend   | React 18 + Vite + Tailwind CSS  |
-| Real-time  | Socket.io                       |
-| Backend    | Node.js + Express               |
-| Auth       | JWT (httpOnly cookie) + bcrypt  |
-| Database   | PostgreSQL + Prisma             |
-| Cache      | Redis (live game state)         |
+| Layer    | Tech                           |
+|----------|--------------------------------|
+| Frontend | React 18 + Vite + Tailwind CSS |
+| Backend  | Node.js + Express              |
+| Auth     | JWT (httpOnly cookie) + bcrypt |
+| Database | SQLite + Prisma ORM            |

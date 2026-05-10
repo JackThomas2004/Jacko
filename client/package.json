@@ -1,7 +1,7 @@
 {
-  "name": "jacko-client",
+  "name": "parkspot-client",
   "version": "1.0.0",
-  "description": "Jacko multiplayer card game – React frontend",
+  "description": "ParkSpot – peer-to-peer parking rental platform frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,8 +12,7 @@
     "axios": "^1.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.1",
-    "socket.io-client": "^4.7.4"
+    "react-router-dom": "^6.22.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.55",

@@ -9,33 +9,25 @@ const router = express.Router();
 
 // POST /api/v1/auth/register
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
-  if (!username || !email || !password) {
-    return res.status(400).json({ error: 'username, email, and password are required' });
-  }
-  if (username.length < 2 || username.length > 30) {
-    return res.status(400).json({ error: 'Username must be 2–30 characters' });
+  const { name, email, password, phone } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'name, email, and password are required' });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: 'Password must be at least 6 characters' });
   }
 
   try {
-    const existing = await prisma.user.findFirst({
-      where: { OR: [{ email }, { username }] },
-    });
-    if (existing) {
-      return res.status(409).json({ error: 'Username or email already taken' });
-    }
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) return res.status(409).json({ error: 'Email already registered' });
 
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
-      data: { id: uuidv4(), username, email, passwordHash },
+      data: { id: uuidv4(), name, email, passwordHash, phone: phone || null },
     });
 
     const token = signToken(user.id);
     setTokenCookie(res, token);
-
     return res.status(201).json({ user: safeUser(user) });
   } catch (err) {
     console.error(err);
@@ -57,7 +49,6 @@ router.post('/login', async (req, res) => {
 
     const token = signToken(user.id);
     setTokenCookie(res, token);
-
     return res.json({ user: safeUser(user) });
   } catch (err) {
     console.error(err);
@@ -82,10 +73,23 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------------------
+// PATCH /api/v1/auth/me
+router.patch('/me', authMiddleware, async (req, res) => {
+  const { name, phone, bio } = req.body;
+  try {
+    const user = await prisma.user.update({
+      where: { id: req.userId },
+      data: { name, phone, bio },
+    });
+    return res.json({ user: safeUser(user) });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
 function signToken(userId) {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '1d',
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 }
 
@@ -93,17 +97,18 @@ function setTokenCookie(res, token) {
   res.cookie('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none',
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
 
 function safeUser(user) {
   return {
     id: user.id,
-    username: user.username,
+    name: user.name,
     email: user.email,
-    avatarUrl: user.avatarUrl,
+    phone: user.phone,
+    bio: user.bio,
     createdAt: user.createdAt,
   };
 }

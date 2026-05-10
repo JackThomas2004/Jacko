@@ -1,7 +1,7 @@
 {
-  "name": "jacko-server",
+  "name": "parkspot-server",
   "version": "1.0.0",
-  "description": "Jacko multiplayer card game – Node.js backend",
+  "description": "ParkSpot – peer-to-peer parking rental platform backend",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev --name init",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed": "node src/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",
@@ -20,8 +21,6 @@
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "redis": "^4.6.13",
-    "socket.io": "^4.7.4",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

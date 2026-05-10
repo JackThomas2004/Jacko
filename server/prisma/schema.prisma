@@ -3,108 +3,80 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id           String   @id @default(uuid())
-  username     String   @unique @db.VarChar(30)
-  email        String   @unique @db.VarChar(255)
+  name         String
+  email        String   @unique
   passwordHash String
-  avatarUrl    String?
+  phone        String?
+  bio          String?
   createdAt    DateTime @default(now())
 
-  // Relations
-  sentRequests     Friendship[] @relation("Requester")
-  receivedRequests Friendship[] @relation("Addressee")
-  hostedLobbies    Lobby[]      @relation("Host")
-  lobbyMembers     LobbyMember[]
-  wonGames         Game[]       @relation("Winner")
-  gameScores       GameScore[]
+  spaces    Space[]
+  bookings  Booking[] @relation("RenterBookings")
+  reviews   Review[]  @relation("ReviewerReviews")
 
   @@map("users")
 }
 
-enum FriendshipStatus {
-  pending
-  accepted
-  declined
-  blocked
+model Space {
+  id           String    @id @default(uuid())
+  ownerId      String
+  title        String
+  description  String?
+  address      String
+  city         String
+  state        String
+  zipCode      String
+  type         String    // garage | driveway | parking_lot | carport
+  pricePerHour Float?
+  pricePerDay  Float?
+  amenities    String    @default("[]") // JSON array
+  images       String    @default("[]") // JSON array
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+  reviews  Review[]
+
+  @@map("spaces")
 }
 
-model Friendship {
-  id          String           @id @default(uuid())
-  requesterId String
-  addresseeId String
-  status      FriendshipStatus @default(pending)
-  createdAt   DateTime         @default(now())
+model Booking {
+  id         String   @id @default(uuid())
+  spaceId    String
+  renterId   String
+  startTime  DateTime
+  endTime    DateTime
+  totalPrice Float
+  status     String   @default("pending") // pending | confirmed | cancelled | completed
+  notes      String?
+  createdAt  DateTime @default(now())
 
-  requester User @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
-  addressee User @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  space   Space   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  renter  User    @relation("RenterBookings", fields: [renterId], references: [id], onDelete: Cascade)
+  review  Review?
 
-  @@unique([requesterId, addresseeId])
-  @@map("friendships")
+  @@map("bookings")
 }
 
-enum LobbyStatus {
-  waiting
-  in_progress
-  finished
-}
+model Review {
+  id         String   @id @default(uuid())
+  bookingId  String   @unique
+  spaceId    String
+  reviewerId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
 
-model Lobby {
-  id         String      @id @default(uuid())
-  code       String      @unique @db.VarChar(6)
-  hostId     String
-  status     LobbyStatus @default(waiting)
-  maxPlayers Int         @default(4)
-  createdAt  DateTime    @default(now())
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  space    Space   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  reviewer User    @relation("ReviewerReviews", fields: [reviewerId], references: [id], onDelete: Cascade)
 
-  host    User          @relation("Host", fields: [hostId], references: [id], onDelete: Cascade)
-  members LobbyMember[]
-  games   Game[]
-
-  @@map("lobbies")
-}
-
-model LobbyMember {
-  lobbyId  String
-  userId   String
-  isReady  Boolean  @default(false)
-  joinedAt DateTime @default(now())
-
-  lobby Lobby @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([lobbyId, userId])
-  @@map("lobby_members")
-}
-
-model Game {
-  id        String    @id @default(uuid())
-  lobbyId   String
-  winnerId  String?
-  startedAt DateTime  @default(now())
-  endedAt   DateTime?
-
-  lobby  Lobby       @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
-  winner User?       @relation("Winner", fields: [winnerId], references: [id])
-  scores GameScore[]
-
-  @@map("games")
-}
-
-model GameScore {
-  id          String @id @default(uuid())
-  gameId      String
-  userId      String
-  roundNumber Int
-  roundScore  Int
-  totalScore  Int
-
-  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("game_scores")
+  @@map("reviews")
 }

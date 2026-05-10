@@ -1,99 +1,58 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { SocketProvider } from './context/SocketContext';
 
 import Landing from './pages/Landing';
-import Home from './pages/Home';
-import Friends from './pages/Friends';
-import Lobby from './pages/Lobby';
-import Game from './pages/Game';
-import RoundSummary from './pages/RoundSummary';
-import GameOver from './pages/GameOver';
+import Browse from './pages/Browse';
+import SpaceDetail from './pages/SpaceDetail';
+import Dashboard from './pages/Dashboard';
+import ListSpace from './pages/ListSpace';
+import EditSpace from './pages/EditSpace';
+import MyBookings from './pages/MyBookings';
+import HostedBookings from './pages/HostedBookings';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center text-gray-400">
-        Loading…
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
   return user ? children : <Navigate to="/" replace />;
 }
 
-function GuestRoute({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  return !user ? children : <Navigate to="/home" replace />;
-}
-
 export default function App() {
   return (
     <AuthProvider>
-      <SocketProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <GuestRoute>
-                  <Landing />
-                </GuestRoute>
-              }
-            />
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/friends"
-              element={
-                <ProtectedRoute>
-                  <Friends />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/lobby/:code"
-              element={
-                <ProtectedRoute>
-                  <Lobby />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/game/:gameId"
-              element={
-                <ProtectedRoute>
-                  <Game />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/round-summary/:gameId"
-              element={
-                <ProtectedRoute>
-                  <RoundSummary />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/game-over/:gameId"
-              element={
-                <ProtectedRoute>
-                  <GameOver />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </SocketProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/browse" element={<Browse />} />
+          <Route path="/spaces/:id" element={<SpaceDetail />} />
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          />
+          <Route
+            path="/list-space"
+            element={<ProtectedRoute><ListSpace /></ProtectedRoute>}
+          />
+          <Route
+            path="/spaces/:id/edit"
+            element={<ProtectedRoute><EditSpace /></ProtectedRoute>}
+          />
+          <Route
+            path="/my-bookings"
+            element={<ProtectedRoute><MyBookings /></ProtectedRoute>}
+          />
+          <Route
+            path="/hosted-bookings"
+            element={<ProtectedRoute><HostedBookings /></ProtectedRoute>}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
